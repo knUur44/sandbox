@@ -1,5 +1,6 @@
 name: Semgrep
 
+# Full scan of the repository on every push to dev.
 on:
   push:
     branches: [ "dev" ]
