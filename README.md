@@ -14,35 +14,6 @@ security scanning GitHub Actions:
 - **SonarQube** — code quality + security hotspots
 - **Semgrep** — pattern-based SAST
 
-## What's intentionally wrong
-
-### Vulnerable dependencies (SCA targets — Frogbot, Synopsys, JFrog Xray)
-
-Declared in `composer.json` with known-CVE versions, e.g.:
-
-| Package | Version | Example issue |
-|---|---|---|
-| `phpmailer/phpmailer` | 5.2.16 | CVE-2016-10033 — RCE via mail() |
-| `monolog/monolog` | 1.11.0 | Known deserialization issues |
-| `guzzlehttp/guzzle` | 6.2.0 | Cookie/redirect CVEs |
-| `twig/twig` | 1.35.0 | Sandbox escapes |
-| `symfony/http-foundation` | 2.8.0 | Multiple CVEs |
-| `league/flysystem` | 1.0.0 | TOCTOU / path issues |
-| `firebase/php-jwt` | 3.0.0 | `none` algorithm acceptance |
-| `smarty/smarty` | 3.1.32 | SSTI / RCE CVEs |
-| `erusev/parsedown` | 1.7.0 | XSS |
-
-### Vulnerable code (SAST targets — Semgrep, JFrog SAST, SonarQube, Coverity)
-
-| File | Issue | CWE |
-|---|---|---|
-| `config/config.php` | Hardcoded secrets / API keys, debug on | CWE-798, CWE-489 |
-| `src/Database.php` | SQL Injection, MD5 password hashing | CWE-89, CWE-327 |
-| `src/UserController.php` | Reflected XSS, insecure deserialization, open redirect, weak RNG | CWE-79, CWE-502, CWE-601, CWE-330 |
-| `src/FileManager.php` | LFI / path traversal, arbitrary upload, command injection | CWE-22, CWE-434, CWE-78 |
-| `src/ApiClient.php` | SSRF, TLS verify disabled, weak crypto, `eval()` RCE | CWE-918, CWE-295, CWE-327, CWE-95 |
-| `src/TemplateRenderer.php` | Server-Side Template Injection, JWT `none` | CWE-1336, CWE-347 |
-
 ## Layout
 
 ```
@@ -58,6 +29,3 @@ composer.json            intentionally outdated dependencies
 ```bash
 composer install        # pulls the old, vulnerable dependencies
 ```
-
-You do **not** need to run the app to get scanner output — most of these
-workflows analyze the source and `composer.json`/`composer.lock` statically.
