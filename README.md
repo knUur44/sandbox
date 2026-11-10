@@ -1,4 +1,4 @@
-# Vulnerable PHP App — DevSecOps Testbed
+# Vulnerable PHP App
 
 > ⚠️ **This application is intentionally insecure.** It exists purely to produce
 > findings for security CI/CD workflows. **Never deploy it, expose it to a
