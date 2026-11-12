@@ -22,11 +22,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # The published Psalm image runs PHP 8.4. This lockfile is PHP 7,
+      # so the action's own composer install exits before writing results.sarif.
       - name: Psalm Security Scan
-        uses: psalm/psalm-github-security-scan@f3e6fd9432bc3e44aec078572677ce9d2ef9c287
+        run: |
+          docker run --rm \
+            --entrypoint /bin/sh \
+            -v "${{ github.workspace }}:/github/workspace" \
+            -w /github/workspace \
+            ghcr.io/psalm/psalm-security-scan \
+            -lc 'composer install --no-scripts --no-progress --ignore-platform-reqs && /composer/vendor/bin/psalm --output-format=github --taint-analysis --report=results.sarif || test -s results.sarif'
 
       - name: Upload Security Analysis results to GitHub
         if: ${{ !cancelled() }}
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: results.sarif
