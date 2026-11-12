@@ -41,8 +41,7 @@ jobs:
           import json
           from pathlib import Path
 
-          path = Path("results.sarif")
-          data = json.loads(path.read_text())
+          data = json.loads(Path("results.sarif").read_text())
           used = set()
           for run in data.get("runs", []):
               driver = run.get("tool", {}).get("driver", {})
@@ -55,12 +54,13 @@ jobs:
                   n += 1
               used.add(category)
               run["automationDetails"] = {"id": f"codacy/{category}/"}
-          path.write_text(json.dumps(data))
+          # The CLI writes results.sarif as root, so the runner cannot overwrite it.
+          Path("codacy-upload.sarif").write_text(json.dumps(data))
           print("categories:", ", ".join(sorted(used)))
           PY
 
       - name: Upload Codacy scan results to GitHub Security tab
-        if: ${{ !cancelled() }}
+        if: success()
         uses: github/codeql-action/upload-sarif@v4
         with:
-          sarif_file: results.sarif
+          sarif_file: codacy-upload.sarif
