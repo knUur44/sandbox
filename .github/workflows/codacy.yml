@@ -33,8 +33,34 @@ jobs:
           gh-code-scanning-compat: true
           max-allowed-issues: 2147483647
 
+      # Codacy puts every tool in one SARIF file with the same category.
+      # Code scanning rejects that upload, so each tool gets its own category.
+      - name: Split Codacy tools into separate categories
+        run: |
+          python3 - << 'PY'
+          import json
+          from pathlib import Path
+
+          path = Path("results.sarif")
+          data = json.loads(path.read_text())
+          used = set()
+          for run in data.get("runs", []):
+              driver = run.get("tool", {}).get("driver", {})
+              raw = driver.get("name") or "tool"
+              slug = "".join(ch if ch.isalnum() else "-" for ch in raw).strip("-").lower() or "tool"
+              category = slug
+              n = 2
+              while category in used:
+                  category = f"{slug}-{n}"
+                  n += 1
+              used.add(category)
+              run["automationDetails"] = {"id": f"codacy/{category}/"}
+          path.write_text(json.dumps(data))
+          print("categories:", ", ".join(sorted(used)))
+          PY
+
       - name: Upload Codacy scan results to GitHub Security tab
         if: ${{ !cancelled() }}
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: results.sarif
