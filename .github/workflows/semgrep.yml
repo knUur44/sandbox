@@ -1,9 +1,8 @@
 name: Semgrep
 
-# Full scan of the repository on every push to dev.
+# Manual scan. Needs the SEMGREP_APP_TOKEN secret or the job fails.
 on:
-  push:
-    branches: [ "dev" ]
+  workflow_dispatch:
 
 permissions:
   contents: read

@@ -1,0 +1,23 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+name: OSV-Scanner
+
+on:
+  workflow_dispatch:
+
+permissions:
+  security-events: write
+  contents: read
+  actions: read
+
+jobs:
+  scan:
+    uses: google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@32d3cd482bdadfb38b186c0ad1b031902d55d932 # v2.7.1
+    with:
+      scan-args: |-
+        -r
+        --skip-git
+        ./

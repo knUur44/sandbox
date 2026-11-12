@@ -1,0 +1,32 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+name: Syft
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sbom:
+    permissions:
+      contents: write # required to upload to the Dependency submission API
+    name: Generate SBOM
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # This repo has no Dockerfile. Inventory the source tree, including composer.lock.
+      # Syft lists components. It does not look for vulnerabilities.
+      - name: Generate SBOM and upload dependency snapshot
+        uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
+        with:
+          path: "."
+          format: spdx-json
+          artifact-name: sbom.spdx.json
+          dependency-snapshot: true
