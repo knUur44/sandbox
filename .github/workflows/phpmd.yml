@@ -33,13 +33,20 @@ jobs:
           coverage: none
           tools: phpmd
 
+      # setup-php installs PHPMD 3. The old positional CLI never writes a report:
+      # it treats the path as a command name and exits before phpmd-results.sarif exists.
       - name: Run PHPMD
-        run: phpmd src,public,views,config sarif codesize --reportfile phpmd-results.sarif
-        continue-on-error: true
+        run: |
+          phpmd analyze \
+            --format sarif \
+            --ruleset codesize \
+            --reportfile-sarif phpmd-results.sarif \
+            -- src public views config \
+          || test -s phpmd-results.sarif
 
       - name: Upload analysis results to GitHub
         if: ${{ !cancelled() }}
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: phpmd-results.sarif
           wait-for-processing: true
